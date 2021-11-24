@@ -19,6 +19,9 @@
 .App-link {
   color: #61dafb;
 }
+h2 {
+  font-family: "Roboto Mono";
+}
 
 @keyframes App-logo-spin {
   from {
