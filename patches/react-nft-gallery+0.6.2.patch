@@ -1,0 +1,382 @@
+diff --git a/node_modules/react-nft-gallery/dist/react-nft-gallery.esm.js b/node_modules/react-nft-gallery/dist/react-nft-gallery.esm.js
+index b22d715..16c4633 100644
+--- a/node_modules/react-nft-gallery/dist/react-nft-gallery.esm.js
++++ b/node_modules/react-nft-gallery/dist/react-nft-gallery.esm.js
+@@ -992,7 +992,19 @@ var LoadMoreButton = function LoadMoreButton(_ref) {
+   }, "Load more"));
+ };
+ 
++var RetryButton = function RetryButton(_ref) {
++  var onClick = _ref.onClick;
++  return React.createElement("div", {
++    className: "rnftg-flex rnftg-justify-center rnftg-items-center rnftg-p-6 rnftg-fixed rnftg-w-full rnftg-bottom-0 rnftg-left-0 rnftg-bg-red-400 rnftg-box-border"
++  }, React.createElement("button", {
++    className: joinClassNames('rnftg-px-4 rnftg-py-2 rnftg-rounded-2xl rnftg-bg-transparent rnftg-text-black dark:rnftg-text-gray-200', 'rnftg-border rnftg-border-solid rnftg-border-black dark:rnftg-border-gray-200 rnftg-shadow-xl rnftg-cursor-pointer'),
++    onClick: onClick
++  }, "Couldn't fetch data. Please click to Retry"));
++};
++
+ var OPENSEA_API_OFFSET = 50;
++var OPENSEA_URL = 'https://api.opensea.io';
++var ENS_GRAPH_URL = 'https://api.thegraph.com/subgraphs/name/ensdomains/ens';
+ var resolveEnsDomain = /*#__PURE__*/function () {
+   var _ref = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/runtime_1.mark(function _callee(ensDomainName) {
+     var query, variables, result, _yield$result$json, data, address;
+@@ -1007,7 +1019,7 @@ var resolveEnsDomain = /*#__PURE__*/function () {
+             };
+             _context.prev = 2;
+             _context.next = 5;
+-            return fetch('https://api.thegraph.com/subgraphs/name/ensdomains/ens', {
++            return fetch(ENS_GRAPH_URL, {
+               method: 'POST',
+               body: JSON.stringify({
+                 query: query,
+@@ -1055,17 +1067,16 @@ var resolveEnsDomain = /*#__PURE__*/function () {
+ }();
+ var fetchOpenseaAssets = /*#__PURE__*/function () {
+   var _ref3 = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/runtime_1.mark(function _callee2(_ref2) {
+-    var owner, offset, apiKey, apiUrl, result, error, _yield$result$json2, assets;
+-
++    var owner, cursor, apiKey, isProxyApi, apiUrl, apiUrlFinal, result, error, response, assets, nextCursor;
+     return runtime_1.wrap(function _callee2$(_context2) {
+       while (1) {
+         switch (_context2.prev = _context2.next) {
+           case 0:
+-            owner = _ref2.owner, offset = _ref2.offset, apiKey = _ref2.apiKey;
++            owner = _ref2.owner, cursor = _ref2.cursor, apiKey = _ref2.apiKey, isProxyApi = _ref2.isProxyApi, apiUrl = _ref2.apiUrl;
+             _context2.prev = 1;
+-            apiUrl = apiKey ? "https://api.opensea.io/api/v1/assets?limit=50&offset=" + offset + (owner ? '&owner=' + owner : '') : "https://api.opensea.io/api/v1/assets?" + (owner ? '&owner=' + owner : '');
++            apiUrlFinal = apiKey || isProxyApi ? (apiUrl ? apiUrl : OPENSEA_URL) + "/api/v1/assets?limit=50&cursor=" + cursor + (owner ? '&owner=' + owner : '') : (apiUrl ? apiUrl : OPENSEA_URL) + "/api/v1/assets?" + (owner ? '&owner=' + owner : '');
+             _context2.next = 5;
+-            return fetch(apiUrl, apiKey ? {
++            return fetch(apiUrlFinal, apiKey ? {
+               headers: {
+                 'X-API-KEY': apiKey
+               }
+@@ -1091,15 +1102,23 @@ var fetchOpenseaAssets = /*#__PURE__*/function () {
+             return result.json();
+ 
+           case 13:
+-            _yield$result$json2 = _context2.sent;
+-            assets = _yield$result$json2.assets;
+-            return _context2.abrupt("return", assets);
++            response = _context2.sent;
++            assets = response.assets, nextCursor = response.next;
++            return _context2.abrupt("return", {
++              assets: assets,
++              nextCursor: nextCursor,
++              hasError: false
++            });
+ 
+           case 18:
+             _context2.prev = 18;
+             _context2.t0 = _context2["catch"](1);
+             console.error('fetchAssets failed:', _context2.t0);
+-            return _context2.abrupt("return", []);
++            return _context2.abrupt("return", {
++              assets: [],
++              nextCursor: '',
++              hasError: true
++            });
+ 
+           case 22:
+           case "end":
+@@ -1114,7 +1133,7 @@ var fetchOpenseaAssets = /*#__PURE__*/function () {
+   };
+ }();
+ 
+-var css_248z$2 = ".rnftg-mx-2{margin-left:.5rem;margin-right:.5rem}.rnftg-my-4{margin-top:1rem;margin-bottom:1rem}.rnftg-mr-2{margin-right:.5rem}.rnftg-flex{display:flex}.rnftg-grid{display:grid}.rnftg-h-4{height:1rem}.rnftg-h-8{height:2rem}.rnftg-h-full{height:100%}.rnftg-w-8{width:2rem}.rnftg-w-1\\/2{width:50%}.rnftg-w-1\\/3{width:33.333333%}.rnftg-w-full{width:100%}@-webkit-keyframes rnftg-spin{to{transform:rotate(1turn)}}@keyframes rnftg-spin{to{transform:rotate(1turn)}}@-webkit-keyframes rnftg-ping{75%,to{transform:scale(2);opacity:0}}@keyframes rnftg-ping{75%,to{transform:scale(2);opacity:0}}@-webkit-keyframes rnftg-pulse{50%{opacity:.5}}@keyframes rnftg-pulse{50%{opacity:.5}}@-webkit-keyframes rnftg-bounce{0%,to{transform:translateY(-25%);-webkit-animation-timing-function:cubic-bezier(.8,0,1,1);animation-timing-function:cubic-bezier(.8,0,1,1)}50%{transform:none;-webkit-animation-timing-function:cubic-bezier(0,0,.2,1);animation-timing-function:cubic-bezier(0,0,.2,1)}}@keyframes rnftg-bounce{0%,to{transform:translateY(-25%);-webkit-animation-timing-function:cubic-bezier(.8,0,1,1);animation-timing-function:cubic-bezier(.8,0,1,1)}50%{transform:none;-webkit-animation-timing-function:cubic-bezier(0,0,.2,1);animation-timing-function:cubic-bezier(0,0,.2,1)}}.rnftg-animate-pulse{-webkit-animation:rnftg-pulse 2s cubic-bezier(.4,0,.6,1) infinite;animation:rnftg-pulse 2s cubic-bezier(.4,0,.6,1) infinite}.rnftg-cursor-pointer{cursor:pointer}.rnftg-grid-flow-row{grid-auto-flow:row}.rnftg-grid-flow-col{grid-auto-flow:column}.rnftg-grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.rnftg-flex-row{flex-direction:row}.rnftg-flex-col{flex-direction:column}.rnftg-items-center{align-items:center}.rnftg-justify-center{justify-content:center}.rnftg-gap-6{gap:1.5rem}.rnftg-overflow-auto{overflow:auto}.rnftg-truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rnftg-break-words{overflow-wrap:break-word}.rnftg-rounded-2xl{border-radius:1rem}.rnftg-rounded-full{border-radius:9999px}.rnftg-rounded-t-2xl{border-top-left-radius:1rem;border-top-right-radius:1rem}.rnftg-border{border-width:1px}.rnftg-border-solid{border-style:solid}.rnftg-border-black{--tw-border-opacity:1;border-color:rgba(0,0,0,var(--tw-border-opacity))}.rnftg-border-gray-100{--tw-border-opacity:1;border-color:rgba(243,244,246,var(--tw-border-opacity))}.rnftg-dark .dark\\:rnftg-border-gray-200{--tw-border-opacity:1;border-color:rgba(229,231,235,var(--tw-border-opacity))}.rnftg-dark .dark\\:rnftg-border-gray-900{--tw-border-opacity:1;border-color:rgba(17,24,39,var(--tw-border-opacity))}.rnftg-bg-transparent{background-color:transparent}.rnftg-bg-white{--tw-bg-opacity:1;background-color:rgba(255,255,255,var(--tw-bg-opacity))}.rnftg-bg-gray-50{--tw-bg-opacity:1;background-color:rgba(249,250,251,var(--tw-bg-opacity))}.rnftg-bg-gray-300{--tw-bg-opacity:1;background-color:rgba(209,213,219,var(--tw-bg-opacity))}.rnftg-dark .dark\\:rnftg-bg-gray-600{--tw-bg-opacity:1;background-color:rgba(75,85,99,var(--tw-bg-opacity))}.rnftg-dark .dark\\:rnftg-bg-gray-800{--tw-bg-opacity:1;background-color:rgba(31,41,55,var(--tw-bg-opacity))}.rnftg-dark .dark\\:rnftg-bg-gray-900{--tw-bg-opacity:1;background-color:rgba(17,24,39,var(--tw-bg-opacity))}.rnftg-object-cover{-o-object-fit:cover;object-fit:cover}.rnftg-p-4{padding:1rem}.rnftg-p-6{padding:1.5rem}.rnftg-px-4{padding-left:1rem;padding-right:1rem}.rnftg-py-2{padding-top:.5rem;padding-bottom:.5rem}.rnftg-text-sm{font-size:.875rem;line-height:1.25rem}.rnftg-text-lg{font-size:1.125rem;line-height:1.75rem}.rnftg-font-semibold{font-weight:600}.rnftg-text-black{--tw-text-opacity:1;color:rgba(0,0,0,var(--tw-text-opacity))}.rnftg-dark .dark\\:rnftg-text-gray-200,.rnftg-text-gray-200{--tw-text-opacity:1;color:rgba(229,231,235,var(--tw-text-opacity))}.rnftg-no-underline{text-decoration:none}*,:after,:before{--tw-shadow:0 0 transparent}.rnftg-shadow-lg{--tw-shadow:0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -2px rgba(0,0,0,0.05);box-shadow:var(--tw-ring-offset-shadow,0 0 transparent),var(--tw-ring-shadow,0 0 transparent),var(--tw-shadow)}.hover\\:rnftg-shadow-xl:hover,.rnftg-shadow-xl{--tw-shadow:0 20px 25px -5px rgba(0,0,0,0.1),0 10px 10px -5px rgba(0,0,0,0.04);box-shadow:var(--tw-ring-offset-shadow,0 0 transparent),var(--tw-ring-shadow,0 0 transparent),var(--tw-shadow)}*,:after,:before{--tw-ring-inset:var(--tw-empty,/*!*/ /*!*/);--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,0.5);--tw-ring-offset-shadow:0 0 transparent;--tw-ring-shadow:0 0 transparent}.rnftg-transition{transition-property:background-color,border-color,color,fill,stroke,opacity,box-shadow,transform,filter,-webkit-backdrop-filter;transition-property:background-color,border-color,color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-property:background-color,border-color,color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter,-webkit-backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.rnftg-duration-300{transition-duration:.3s}@media (min-width:768px){.md\\:rnftg-grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (min-width:1024px){.lg\\:rnftg-grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}}@media (min-width:1280px){.xl\\:rnftg-grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}}";
++var css_248z$2 = ".rnftg-fixed{position:fixed}.rnftg-bottom-0{bottom:0}.rnftg-left-0{left:0}.rnftg-mx-2{margin-left:.5rem;margin-right:.5rem}.rnftg-my-4{margin-top:1rem;margin-bottom:1rem}.rnftg-mr-2{margin-right:.5rem}.rnftg-box-border{box-sizing:border-box}.rnftg-flex{display:flex}.rnftg-grid{display:grid}.rnftg-h-4{height:1rem}.rnftg-h-8{height:2rem}.rnftg-h-full{height:100%}.rnftg-w-8{width:2rem}.rnftg-w-1\\/2{width:50%}.rnftg-w-1\\/3{width:33.333333%}.rnftg-w-full{width:100%}@-webkit-keyframes rnftg-spin{to{transform:rotate(1turn)}}@keyframes rnftg-spin{to{transform:rotate(1turn)}}@-webkit-keyframes rnftg-ping{75%,to{transform:scale(2);opacity:0}}@keyframes rnftg-ping{75%,to{transform:scale(2);opacity:0}}@-webkit-keyframes rnftg-pulse{50%{opacity:.5}}@keyframes rnftg-pulse{50%{opacity:.5}}@-webkit-keyframes rnftg-bounce{0%,to{transform:translateY(-25%);-webkit-animation-timing-function:cubic-bezier(.8,0,1,1);animation-timing-function:cubic-bezier(.8,0,1,1)}50%{transform:none;-webkit-animation-timing-function:cubic-bezier(0,0,.2,1);animation-timing-function:cubic-bezier(0,0,.2,1)}}@keyframes rnftg-bounce{0%,to{transform:translateY(-25%);-webkit-animation-timing-function:cubic-bezier(.8,0,1,1);animation-timing-function:cubic-bezier(.8,0,1,1)}50%{transform:none;-webkit-animation-timing-function:cubic-bezier(0,0,.2,1);animation-timing-function:cubic-bezier(0,0,.2,1)}}.rnftg-animate-pulse{-webkit-animation:rnftg-pulse 2s cubic-bezier(.4,0,.6,1) infinite;animation:rnftg-pulse 2s cubic-bezier(.4,0,.6,1) infinite}.rnftg-cursor-pointer{cursor:pointer}.rnftg-grid-flow-row{grid-auto-flow:row}.rnftg-grid-flow-col{grid-auto-flow:column}.rnftg-grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.rnftg-flex-row{flex-direction:row}.rnftg-flex-col{flex-direction:column}.rnftg-items-center{align-items:center}.rnftg-justify-center{justify-content:center}.rnftg-gap-6{gap:1.5rem}.rnftg-overflow-auto{overflow:auto}.rnftg-truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rnftg-break-words{overflow-wrap:break-word}.rnftg-rounded-2xl{border-radius:1rem}.rnftg-rounded-full{border-radius:9999px}.rnftg-rounded-t-2xl{border-top-left-radius:1rem;border-top-right-radius:1rem}.rnftg-border{border-width:1px}.rnftg-border-solid{border-style:solid}.rnftg-border-black{--tw-border-opacity:1;border-color:rgba(0,0,0,var(--tw-border-opacity))}.rnftg-border-gray-100{--tw-border-opacity:1;border-color:rgba(243,244,246,var(--tw-border-opacity))}.rnftg-dark .dark\\:rnftg-border-gray-200{--tw-border-opacity:1;border-color:rgba(229,231,235,var(--tw-border-opacity))}.rnftg-dark .dark\\:rnftg-border-gray-900{--tw-border-opacity:1;border-color:rgba(17,24,39,var(--tw-border-opacity))}.rnftg-bg-transparent{background-color:transparent}.rnftg-bg-white{--tw-bg-opacity:1;background-color:rgba(255,255,255,var(--tw-bg-opacity))}.rnftg-bg-gray-50{--tw-bg-opacity:1;background-color:rgba(249,250,251,var(--tw-bg-opacity))}.rnftg-bg-gray-300{--tw-bg-opacity:1;background-color:rgba(209,213,219,var(--tw-bg-opacity))}.rnftg-bg-red-400{--tw-bg-opacity:1;background-color:rgba(248,113,113,var(--tw-bg-opacity))}.rnftg-dark .dark\\:rnftg-bg-gray-600{--tw-bg-opacity:1;background-color:rgba(75,85,99,var(--tw-bg-opacity))}.rnftg-dark .dark\\:rnftg-bg-gray-800{--tw-bg-opacity:1;background-color:rgba(31,41,55,var(--tw-bg-opacity))}.rnftg-dark .dark\\:rnftg-bg-gray-900{--tw-bg-opacity:1;background-color:rgba(17,24,39,var(--tw-bg-opacity))}.rnftg-object-cover{-o-object-fit:cover;object-fit:cover}.rnftg-p-4{padding:1rem}.rnftg-p-6{padding:1.5rem}.rnftg-px-4{padding-left:1rem;padding-right:1rem}.rnftg-py-2{padding-top:.5rem;padding-bottom:.5rem}.rnftg-text-sm{font-size:.875rem;line-height:1.25rem}.rnftg-text-lg{font-size:1.125rem;line-height:1.75rem}.rnftg-font-semibold{font-weight:600}.rnftg-text-black{--tw-text-opacity:1;color:rgba(0,0,0,var(--tw-text-opacity))}.rnftg-dark .dark\\:rnftg-text-gray-200,.rnftg-text-gray-200{--tw-text-opacity:1;color:rgba(229,231,235,var(--tw-text-opacity))}.rnftg-no-underline{text-decoration:none}*,:after,:before{--tw-shadow:0 0 transparent}.rnftg-shadow-lg{--tw-shadow:0 10px 15px -3px rgba(0,0,0,0.1),0 4px 6px -2px rgba(0,0,0,0.05);box-shadow:var(--tw-ring-offset-shadow,0 0 transparent),var(--tw-ring-shadow,0 0 transparent),var(--tw-shadow)}.hover\\:rnftg-shadow-xl:hover,.rnftg-shadow-xl{--tw-shadow:0 20px 25px -5px rgba(0,0,0,0.1),0 10px 10px -5px rgba(0,0,0,0.04);box-shadow:var(--tw-ring-offset-shadow,0 0 transparent),var(--tw-ring-shadow,0 0 transparent),var(--tw-shadow)}*,:after,:before{--tw-ring-inset:var(--tw-empty,/*!*/ /*!*/);--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,0.5);--tw-ring-offset-shadow:0 0 transparent;--tw-ring-shadow:0 0 transparent}.rnftg-transition{transition-property:background-color,border-color,color,fill,stroke,opacity,box-shadow,transform,filter,-webkit-backdrop-filter;transition-property:background-color,border-color,color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-property:background-color,border-color,color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter,-webkit-backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.rnftg-duration-300{transition-duration:.3s}@media (min-width:768px){.md\\:rnftg-grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (min-width:1024px){.lg\\:rnftg-grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}}@media (min-width:1280px){.xl\\:rnftg-grid-cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}}";
+ styleInject(css_248z$2,{"insertAt":"top"});
+ 
+ var SkeletonCard = function SkeletonCard() {
+@@ -1171,6 +1190,10 @@ var NftGallery = function NftGallery(_ref) {
+       ownerAddress = _ref$ownerAddress === void 0 ? '' : _ref$ownerAddress,
+       _ref$openseaApiKey = _ref.openseaApiKey,
+       openseaApiKey = _ref$openseaApiKey === void 0 ? '' : _ref$openseaApiKey,
++      _ref$isProxyApi = _ref.isProxyApi,
++      isProxyApi = _ref$isProxyApi === void 0 ? false : _ref$isProxyApi,
++      _ref$apiUrl = _ref.apiUrl,
++      apiUrl = _ref$apiUrl === void 0 ? '' : _ref$apiUrl,
+       _ref$darkMode = _ref.darkMode,
+       darkMode = _ref$darkMode === void 0 ? false : _ref$darkMode,
+       _ref$metadataIsVisibl = _ref.metadataIsVisible,
+@@ -1198,17 +1221,25 @@ var NftGallery = function NftGallery(_ref) {
+       showcaseAssets = _useState2[0],
+       setShowcaseAssets = _useState2[1];
+ 
+-  var _useState3 = useState(0),
+-      currentOffset = _useState3[0],
+-      setCurrentOffset = _useState3[1];
++  var _useState3 = useState(''),
++      currentCursor = _useState3[0],
++      setCurrentCursor = _useState3[1];
+ 
+-  var _useState4 = useState(false),
+-      canLoadMore = _useState4[0],
+-      setCanLoadMore = _useState4[1];
++  var _useState4 = useState(''),
++      nextCursor = _useState4[0],
++      setNextCursor = _useState4[1];
+ 
+   var _useState5 = useState(false),
+-      isLoading = _useState5[0],
+-      setIsLoading = _useState5[1];
++      hasError = _useState5[0],
++      setHasError = _useState5[1];
++
++  var _useState6 = useState(false),
++      canLoadMore = _useState6[0],
++      setCanLoadMore = _useState6[1];
++
++  var _useState7 = useState(false),
++      isLoading = _useState7[0],
++      setIsLoading = _useState7[1];
+ 
+   var _useLightboxNavigatio = useLightboxNavigation(assets.length - 1),
+       lightboxIndex = _useLightboxNavigatio.lightboxIndex,
+@@ -1219,8 +1250,9 @@ var NftGallery = function NftGallery(_ref) {
+   var displayedAssets = showcaseMode ? showcaseAssets : assets;
+ 
+   var loadAssets = /*#__PURE__*/function () {
+-    var _ref2 = _asyncToGenerator( /*#__PURE__*/runtime_1.mark(function _callee(ownerAddress, apiKey, offset) {
+-      var owner, rawAssets;
++    var _ref2 = _asyncToGenerator( /*#__PURE__*/runtime_1.mark(function _callee(ownerAddress, apiKey, isProxyApi, apiUrl, cursor) {
++      var owner, _yield$fetchOpenseaAs, rawAssets, hasError, nextCursor;
++
+       return runtime_1.wrap(function _callee$(_context) {
+         while (1) {
+           switch (_context.prev = _context.next) {
+@@ -1249,18 +1281,31 @@ var NftGallery = function NftGallery(_ref) {
+               return fetchOpenseaAssets({
+                 owner: owner,
+                 apiKey: apiKey,
+-                offset: offset
++                isProxyApi: isProxyApi,
++                apiUrl: apiUrl,
++                cursor: cursor
+               });
+ 
+             case 11:
+-              rawAssets = _context.sent;
+-              setAssets(function (prevAssets) {
+-                return [].concat(prevAssets, rawAssets);
+-              });
+-              setCanLoadMore(rawAssets.length === OPENSEA_API_OFFSET);
++              _yield$fetchOpenseaAs = _context.sent;
++              rawAssets = _yield$fetchOpenseaAs.assets;
++              hasError = _yield$fetchOpenseaAs.hasError;
++              nextCursor = _yield$fetchOpenseaAs.nextCursor;
++
++              if (hasError) {
++                setHasError(true);
++              } else {
++                setHasError(false);
++                setAssets(function (prevAssets) {
++                  return [].concat(prevAssets, rawAssets);
++                });
++                setCanLoadMore(rawAssets.length === OPENSEA_API_OFFSET);
++                setNextCursor(nextCursor);
++              }
++
+               setIsLoading(false);
+ 
+-            case 15:
++            case 17:
+             case "end":
+               return _context.stop();
+           }
+@@ -1268,47 +1313,45 @@ var NftGallery = function NftGallery(_ref) {
+       }, _callee);
+     }));
+ 
+-    return function loadAssets(_x, _x2, _x3) {
++    return function loadAssets(_x, _x2, _x3, _x4, _x5) {
+       return _ref2.apply(this, arguments);
+     };
+   }();
+ 
+   var loadShowcaseAssets = /*#__PURE__*/function () {
+-    var _ref3 = _asyncToGenerator( /*#__PURE__*/runtime_1.mark(function _callee2(ownerAddress, apiKey) {
+-      var MAX_OFFSET, owner, shouldFetch, currentOffset, _loop;
++    var _ref3 = _asyncToGenerator( /*#__PURE__*/runtime_1.mark(function _callee2(ownerAddress, apiKey, isProxyApi, apiUrl) {
++      var owner, shouldFetch, currentCursor, _loop;
+ 
+       return runtime_1.wrap(function _callee2$(_context3) {
+         while (1) {
+           switch (_context3.prev = _context3.next) {
+             case 0:
+-              setIsLoading(true); // Stop if we already have 1000+ items in play.
+-
+-              MAX_OFFSET = OPENSEA_API_OFFSET * 20;
++              setIsLoading(true); // removed max limit check (MAX_OFFSET) since it is not a case ATM.
+ 
+               if (!isEnsDomain(ownerAddress)) {
+-                _context3.next = 8;
++                _context3.next = 7;
+                 break;
+               }
+ 
+-              _context3.next = 5;
++              _context3.next = 4;
+               return resolveEnsDomain(ownerAddress);
+ 
+-            case 5:
++            case 4:
+               _context3.t0 = _context3.sent;
+-              _context3.next = 9;
++              _context3.next = 8;
+               break;
+ 
+-            case 8:
++            case 7:
+               _context3.t0 = ownerAddress;
+ 
+-            case 9:
++            case 8:
+               owner = _context3.t0;
+               shouldFetch = true;
+-              currentOffset = 0; // Grab all assets of this address to filter down to showcase-only.
++              currentCursor = ''; // Grab all assets of this address to filter down to showcase-only.
+               // TODO: optimise this to exit as soon as all showcase items have been resolved.
+ 
+               _loop = /*#__PURE__*/runtime_1.mark(function _loop() {
+-                var rawAssets;
++                var response, rawAssets, hasError, nextCursor;
+                 return runtime_1.wrap(function _loop$(_context2) {
+                   while (1) {
+                     switch (_context2.prev = _context2.next) {
+@@ -1317,23 +1360,32 @@ var NftGallery = function NftGallery(_ref) {
+                         return fetchOpenseaAssets({
+                           owner: owner,
+                           apiKey: apiKey,
+-                          offset: currentOffset
++                          isProxyApi: isProxyApi,
++                          apiUrl: apiUrl,
++                          cursor: currentCursor
+                         });
+ 
+                       case 2:
+-                        rawAssets = _context2.sent;
+-                        setAssets(function (prevAssets) {
+-                          return [].concat(prevAssets, rawAssets);
+-                        });
+-                        currentOffset += OPENSEA_API_OFFSET;
+-                        if (rawAssets.length !== 0) setIsLoading(false); // Terminate if hit the global limit or we hit a non-full page (i.e. end of assets).
+-
+-                        if (rawAssets.length < OPENSEA_API_OFFSET || currentOffset >= MAX_OFFSET) {
+-                          shouldFetch = false;
+-                          setIsLoading(false);
++                        response = _context2.sent;
++                        rawAssets = response.assets, hasError = response.hasError, nextCursor = response.nextCursor;
++
++                        if (hasError) {
++                          setHasError(true);
++                        } else {
++                          setAssets(function (prevAssets) {
++                            return [].concat(prevAssets, rawAssets);
++                          });
++                          if (rawAssets.length !== 0) setIsLoading(false);
++                          setNextCursor(nextCursor);
++                          setHasError(hasError); // Terminate if hit the global limit or we hit a non-full page (i.e. end of assets).
++
++                          if (rawAssets.length < OPENSEA_API_OFFSET) {
++                            shouldFetch = false;
++                            setIsLoading(false);
++                          }
+                         }
+ 
+-                      case 7:
++                      case 5:
+                       case "end":
+                         return _context2.stop();
+                     }
+@@ -1341,19 +1393,19 @@ var NftGallery = function NftGallery(_ref) {
+                 }, _loop);
+               });
+ 
+-            case 13:
++            case 12:
+               if (!shouldFetch) {
+-                _context3.next = 17;
++                _context3.next = 16;
+                 break;
+               }
+ 
+-              return _context3.delegateYield(_loop(), "t1", 15);
++              return _context3.delegateYield(_loop(), "t1", 14);
+ 
+-            case 15:
+-              _context3.next = 13;
++            case 14:
++              _context3.next = 12;
+               break;
+ 
+-            case 17:
++            case 16:
+             case "end":
+               return _context3.stop();
+           }
+@@ -1361,7 +1413,7 @@ var NftGallery = function NftGallery(_ref) {
+       }, _callee2);
+     }));
+ 
+-    return function loadShowcaseAssets(_x4, _x5) {
++    return function loadShowcaseAssets(_x6, _x7, _x8, _x9) {
+       return _ref3.apply(this, arguments);
+     };
+   }();
+@@ -1375,9 +1427,7 @@ var NftGallery = function NftGallery(_ref) {
+ 
+   var onLastItemInView = function onLastItemInView(isInView) {
+     if (!hasLoadMoreButton && isInView) {
+-      setCurrentOffset(function (prevOffset) {
+-        return prevOffset + OPENSEA_API_OFFSET;
+-      });
++      setCurrentCursor(nextCursor);
+     }
+   }; // TODO: Move into `Lightbox` component once its refactored to being a singleton.
+ 
+@@ -1404,11 +1454,11 @@ var NftGallery = function NftGallery(_ref) {
+ 
+   useEffect(function () {
+     if (showcaseMode) {
+-      loadShowcaseAssets(ownerAddress, openseaApiKey);
++      loadShowcaseAssets(ownerAddress, openseaApiKey, isProxyApi, apiUrl);
+     } else {
+-      loadAssets(ownerAddress, openseaApiKey, currentOffset);
++      loadAssets(ownerAddress, openseaApiKey, isProxyApi, apiUrl, currentCursor);
+     }
+-  }, [showcaseMode, ownerAddress, openseaApiKey, currentOffset]); // Isolates assets specified for showcase mode into their own collection whenever `assets` changes.
++  }, [showcaseMode, ownerAddress, openseaApiKey, isProxyApi, apiUrl, currentCursor]); // Isolates assets specified for showcase mode into their own collection whenever `assets` changes.
+ 
+   useEffect(function () {
+     if (assets.length !== 0 && showcaseMode && Array.isArray(showcaseItemIds)) {
+@@ -1431,9 +1481,15 @@ var NftGallery = function NftGallery(_ref) {
+     });
+   };
+ 
++  var retryLastRequest = function retryLastRequest() {
++    return loadAssets(ownerAddress, openseaApiKey, isProxyApi, apiUrl, nextCursor);
++  };
++
+   return React.createElement("div", {
+     className: joinClassNames(darkMode ? 'rnftg-dark' : '', 'rnftg-h-full')
+-  }, React.createElement("div", {
++  }, hasError && React.createElement(RetryButton, {
++    onClick: retryLastRequest
++  }), React.createElement("div", {
+     style: galleryContainerStyle,
+     className: joinClassNames('rnftg-h-full rnftg-p-6 rnftg-overflow-auto rnftg-bg-gray-50 dark:rnftg-bg-gray-900', isInline ? 'rnftg--inline' : '')
+   }, React.createElement("div", {
+@@ -1462,9 +1518,7 @@ var NftGallery = function NftGallery(_ref) {
+     }, item) : item;
+   })), hasLoadMoreButton && canLoadMore && React.createElement(LoadMoreButton, {
+     onClick: function onClick() {
+-      setCurrentOffset(function (prevOffset) {
+-        return prevOffset + OPENSEA_API_OFFSET;
+-      });
++      setCurrentCursor(nextCursor);
+     }
+   }))));
+ };

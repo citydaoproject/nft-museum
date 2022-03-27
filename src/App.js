@@ -8,7 +8,12 @@ function App() {
       <header className="App-header">
         <h2>Art Musem of CityDAO</h2>
         <p>Curated by CityDAO citizen <a href="https://twitter.com/getprsm">Casey</a>.  <br/><span className="Donate"> Donations accepted to daocity.eth</span></p>
-        <NftGallery ownerAddress="daocity.eth" darkMode={true} />
+        <NftGallery
+          ownerAddress="daocity.eth"
+          darkMode={true}
+          isProxyApi={true}
+          apiUrl={process.env.REACT_APP_OPENSEA_API_URL}
+        />
         {/* <NFT 
         collection={"0x8d04a8c79ceb0889bdd12acdf3fa9d207ed3ff63"}
         item={"501"}
