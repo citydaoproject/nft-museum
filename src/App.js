@@ -6,7 +6,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h2>Art Musem of CityDAO</h2>
+        <h2>Art Museum of CityDAO</h2>
         <p>
           Curated by CityDAO citizen{" "}
           <a href="https://twitter.com/getprsm">Casey</a>. <br />
