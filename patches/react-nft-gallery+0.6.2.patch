@@ -1,8 +1,8 @@
 diff --git a/node_modules/react-nft-gallery/dist/react-nft-gallery.esm.js b/node_modules/react-nft-gallery/dist/react-nft-gallery.esm.js
-index b22d715..16c4633 100644
+index b22d715..ea164b7 100644
 --- a/node_modules/react-nft-gallery/dist/react-nft-gallery.esm.js
 +++ b/node_modules/react-nft-gallery/dist/react-nft-gallery.esm.js
-@@ -992,7 +992,19 @@ var LoadMoreButton = function LoadMoreButton(_ref) {
+@@ -992,7 +992,20 @@ var LoadMoreButton = function LoadMoreButton(_ref) {
    }, "Load more"));
  };
  
@@ -19,10 +19,11 @@ index b22d715..16c4633 100644
  var OPENSEA_API_OFFSET = 50;
 +var OPENSEA_URL = 'https://api.opensea.io';
 +var ENS_GRAPH_URL = 'https://api.thegraph.com/subgraphs/name/ensdomains/ens';
++var AUTO_RETRY_ATTEMPT_INTERVAL = 1600;
  var resolveEnsDomain = /*#__PURE__*/function () {
    var _ref = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/runtime_1.mark(function _callee(ensDomainName) {
      var query, variables, result, _yield$result$json, data, address;
-@@ -1007,7 +1019,7 @@ var resolveEnsDomain = /*#__PURE__*/function () {
+@@ -1007,7 +1020,7 @@ var resolveEnsDomain = /*#__PURE__*/function () {
              };
              _context.prev = 2;
              _context.next = 5;
@@ -31,19 +32,30 @@ index b22d715..16c4633 100644
                method: 'POST',
                body: JSON.stringify({
                  query: query,
-@@ -1055,17 +1067,16 @@ var resolveEnsDomain = /*#__PURE__*/function () {
+@@ -1053,19 +1066,27 @@ var resolveEnsDomain = /*#__PURE__*/function () {
+     return _ref.apply(this, arguments);
+   };
  }();
++
++var delay = function delay(fn) {
++  return new Promise(function (resolve) {
++    setTimeout(function () {
++      return resolve(fn);
++    }, AUTO_RETRY_ATTEMPT_INTERVAL);
++  });
++};
++
  var fetchOpenseaAssets = /*#__PURE__*/function () {
    var _ref3 = /*#__PURE__*/_asyncToGenerator( /*#__PURE__*/runtime_1.mark(function _callee2(_ref2) {
 -    var owner, offset, apiKey, apiUrl, result, error, _yield$result$json2, assets;
 -
-+    var owner, cursor, apiKey, isProxyApi, apiUrl, apiUrlFinal, result, error, response, assets, nextCursor;
++    var owner, cursor, apiKey, isProxyApi, apiUrl, autoRetry, apiUrlFinal, result, error, response, assets, nextCursor;
      return runtime_1.wrap(function _callee2$(_context2) {
        while (1) {
          switch (_context2.prev = _context2.next) {
            case 0:
 -            owner = _ref2.owner, offset = _ref2.offset, apiKey = _ref2.apiKey;
-+            owner = _ref2.owner, cursor = _ref2.cursor, apiKey = _ref2.apiKey, isProxyApi = _ref2.isProxyApi, apiUrl = _ref2.apiUrl;
++            owner = _ref2.owner, cursor = _ref2.cursor, apiKey = _ref2.apiKey, isProxyApi = _ref2.isProxyApi, apiUrl = _ref2.apiUrl, autoRetry = _ref2.autoRetry;
              _context2.prev = 1;
 -            apiUrl = apiKey ? "https://api.opensea.io/api/v1/assets?limit=50&offset=" + offset + (owner ? '&owner=' + owner : '') : "https://api.opensea.io/api/v1/assets?" + (owner ? '&owner=' + owner : '');
 +            apiUrlFinal = apiKey || isProxyApi ? (apiUrl ? apiUrl : OPENSEA_URL) + "/api/v1/assets?limit=50&cursor=" + cursor + (owner ? '&owner=' + owner : '') : (apiUrl ? apiUrl : OPENSEA_URL) + "/api/v1/assets?" + (owner ? '&owner=' + owner : '');
@@ -53,7 +65,7 @@ index b22d715..16c4633 100644
                headers: {
                  'X-API-KEY': apiKey
                }
-@@ -1091,15 +1102,23 @@ var fetchOpenseaAssets = /*#__PURE__*/function () {
+@@ -1091,17 +1112,42 @@ var fetchOpenseaAssets = /*#__PURE__*/function () {
              return result.json();
  
            case 13:
@@ -71,6 +83,23 @@ index b22d715..16c4633 100644
            case 18:
              _context2.prev = 18;
              _context2.t0 = _context2["catch"](1);
++
++            if (!autoRetry) {
++              _context2.next = 25;
++              break;
++            }
++
++            console.log("Retrying in " + AUTO_RETRY_ATTEMPT_INTERVAL + " ms...");
++            return _context2.abrupt("return", delay(fetchOpenseaAssets({
++              owner: owner,
++              cursor: cursor,
++              apiKey: apiKey,
++              isProxyApi: isProxyApi,
++              apiUrl: apiUrl,
++              autoRetry: autoRetry
++            })));
++
++          case 25:
              console.error('fetchAssets failed:', _context2.t0);
 -            return _context2.abrupt("return", []);
 +            return _context2.abrupt("return", {
@@ -79,9 +108,12 @@ index b22d715..16c4633 100644
 +              hasError: true
 +            });
  
-           case 22:
+-          case 22:
++          case 27:
            case "end":
-@@ -1114,7 +1133,7 @@ var fetchOpenseaAssets = /*#__PURE__*/function () {
+             return _context2.stop();
+         }
+@@ -1114,7 +1160,7 @@ var fetchOpenseaAssets = /*#__PURE__*/function () {
    };
  }();
  
@@ -90,7 +122,7 @@ index b22d715..16c4633 100644
  styleInject(css_248z$2,{"insertAt":"top"});
  
  var SkeletonCard = function SkeletonCard() {
-@@ -1171,6 +1190,10 @@ var NftGallery = function NftGallery(_ref) {
+@@ -1171,6 +1217,12 @@ var NftGallery = function NftGallery(_ref) {
        ownerAddress = _ref$ownerAddress === void 0 ? '' : _ref$ownerAddress,
        _ref$openseaApiKey = _ref.openseaApiKey,
        openseaApiKey = _ref$openseaApiKey === void 0 ? '' : _ref$openseaApiKey,
@@ -98,10 +130,12 @@ index b22d715..16c4633 100644
 +      isProxyApi = _ref$isProxyApi === void 0 ? false : _ref$isProxyApi,
 +      _ref$apiUrl = _ref.apiUrl,
 +      apiUrl = _ref$apiUrl === void 0 ? '' : _ref$apiUrl,
++      _ref$autoRetry = _ref.autoRetry,
++      autoRetry = _ref$autoRetry === void 0 ? false : _ref$autoRetry,
        _ref$darkMode = _ref.darkMode,
        darkMode = _ref$darkMode === void 0 ? false : _ref$darkMode,
        _ref$metadataIsVisibl = _ref.metadataIsVisible,
-@@ -1198,17 +1221,25 @@ var NftGallery = function NftGallery(_ref) {
+@@ -1198,17 +1250,25 @@ var NftGallery = function NftGallery(_ref) {
        showcaseAssets = _useState2[0],
        setShowcaseAssets = _useState2[1];
  
@@ -135,25 +169,26 @@ index b22d715..16c4633 100644
  
    var _useLightboxNavigatio = useLightboxNavigation(assets.length - 1),
        lightboxIndex = _useLightboxNavigatio.lightboxIndex,
-@@ -1219,8 +1250,9 @@ var NftGallery = function NftGallery(_ref) {
+@@ -1219,8 +1279,9 @@ var NftGallery = function NftGallery(_ref) {
    var displayedAssets = showcaseMode ? showcaseAssets : assets;
  
    var loadAssets = /*#__PURE__*/function () {
 -    var _ref2 = _asyncToGenerator( /*#__PURE__*/runtime_1.mark(function _callee(ownerAddress, apiKey, offset) {
 -      var owner, rawAssets;
-+    var _ref2 = _asyncToGenerator( /*#__PURE__*/runtime_1.mark(function _callee(ownerAddress, apiKey, isProxyApi, apiUrl, cursor) {
++    var _ref2 = _asyncToGenerator( /*#__PURE__*/runtime_1.mark(function _callee(ownerAddress, apiKey, isProxyApi, apiUrl, autoRetry, cursor) {
 +      var owner, _yield$fetchOpenseaAs, rawAssets, hasError, nextCursor;
 +
        return runtime_1.wrap(function _callee$(_context) {
          while (1) {
            switch (_context.prev = _context.next) {
-@@ -1249,18 +1281,31 @@ var NftGallery = function NftGallery(_ref) {
+@@ -1249,18 +1310,32 @@ var NftGallery = function NftGallery(_ref) {
                return fetchOpenseaAssets({
                  owner: owner,
                  apiKey: apiKey,
 -                offset: offset
 +                isProxyApi: isProxyApi,
 +                apiUrl: apiUrl,
++                autoRetry: autoRetry,
 +                cursor: cursor
                });
  
@@ -186,12 +221,12 @@ index b22d715..16c4633 100644
              case "end":
                return _context.stop();
            }
-@@ -1268,47 +1313,45 @@ var NftGallery = function NftGallery(_ref) {
+@@ -1268,47 +1343,45 @@ var NftGallery = function NftGallery(_ref) {
        }, _callee);
      }));
  
 -    return function loadAssets(_x, _x2, _x3) {
-+    return function loadAssets(_x, _x2, _x3, _x4, _x5) {
++    return function loadAssets(_x, _x2, _x3, _x4, _x5, _x6) {
        return _ref2.apply(this, arguments);
      };
    }();
@@ -199,7 +234,7 @@ index b22d715..16c4633 100644
    var loadShowcaseAssets = /*#__PURE__*/function () {
 -    var _ref3 = _asyncToGenerator( /*#__PURE__*/runtime_1.mark(function _callee2(ownerAddress, apiKey) {
 -      var MAX_OFFSET, owner, shouldFetch, currentOffset, _loop;
-+    var _ref3 = _asyncToGenerator( /*#__PURE__*/runtime_1.mark(function _callee2(ownerAddress, apiKey, isProxyApi, apiUrl) {
++    var _ref3 = _asyncToGenerator( /*#__PURE__*/runtime_1.mark(function _callee2(ownerAddress, apiKey, isProxyApi, apiUrl, autoRetry) {
 +      var owner, shouldFetch, currentCursor, _loop;
  
        return runtime_1.wrap(function _callee2$(_context3) {
@@ -246,13 +281,14 @@ index b22d715..16c4633 100644
                  return runtime_1.wrap(function _loop$(_context2) {
                    while (1) {
                      switch (_context2.prev = _context2.next) {
-@@ -1317,23 +1360,32 @@ var NftGallery = function NftGallery(_ref) {
+@@ -1317,23 +1390,33 @@ var NftGallery = function NftGallery(_ref) {
                          return fetchOpenseaAssets({
                            owner: owner,
                            apiKey: apiKey,
 -                          offset: currentOffset
 +                          isProxyApi: isProxyApi,
 +                          apiUrl: apiUrl,
++                          autoRetry: autoRetry,
 +                          cursor: currentCursor
                          });
  
@@ -291,7 +327,7 @@ index b22d715..16c4633 100644
                        case "end":
                          return _context2.stop();
                      }
-@@ -1341,19 +1393,19 @@ var NftGallery = function NftGallery(_ref) {
+@@ -1341,19 +1424,19 @@ var NftGallery = function NftGallery(_ref) {
                  }, _loop);
                });
  
@@ -317,16 +353,16 @@ index b22d715..16c4633 100644
              case "end":
                return _context3.stop();
            }
-@@ -1361,7 +1413,7 @@ var NftGallery = function NftGallery(_ref) {
+@@ -1361,7 +1444,7 @@ var NftGallery = function NftGallery(_ref) {
        }, _callee2);
      }));
  
 -    return function loadShowcaseAssets(_x4, _x5) {
-+    return function loadShowcaseAssets(_x6, _x7, _x8, _x9) {
++    return function loadShowcaseAssets(_x7, _x8, _x9, _x10, _x11) {
        return _ref3.apply(this, arguments);
      };
    }();
-@@ -1375,9 +1427,7 @@ var NftGallery = function NftGallery(_ref) {
+@@ -1375,9 +1458,7 @@ var NftGallery = function NftGallery(_ref) {
  
    var onLastItemInView = function onLastItemInView(isInView) {
      if (!hasLoadMoreButton && isInView) {
@@ -337,27 +373,27 @@ index b22d715..16c4633 100644
      }
    }; // TODO: Move into `Lightbox` component once its refactored to being a singleton.
  
-@@ -1404,11 +1454,11 @@ var NftGallery = function NftGallery(_ref) {
+@@ -1404,11 +1485,11 @@ var NftGallery = function NftGallery(_ref) {
  
    useEffect(function () {
      if (showcaseMode) {
 -      loadShowcaseAssets(ownerAddress, openseaApiKey);
-+      loadShowcaseAssets(ownerAddress, openseaApiKey, isProxyApi, apiUrl);
++      loadShowcaseAssets(ownerAddress, openseaApiKey, isProxyApi, apiUrl, autoRetry);
      } else {
 -      loadAssets(ownerAddress, openseaApiKey, currentOffset);
-+      loadAssets(ownerAddress, openseaApiKey, isProxyApi, apiUrl, currentCursor);
++      loadAssets(ownerAddress, openseaApiKey, isProxyApi, apiUrl, autoRetry, currentCursor);
      }
 -  }, [showcaseMode, ownerAddress, openseaApiKey, currentOffset]); // Isolates assets specified for showcase mode into their own collection whenever `assets` changes.
 +  }, [showcaseMode, ownerAddress, openseaApiKey, isProxyApi, apiUrl, currentCursor]); // Isolates assets specified for showcase mode into their own collection whenever `assets` changes.
  
    useEffect(function () {
      if (assets.length !== 0 && showcaseMode && Array.isArray(showcaseItemIds)) {
-@@ -1431,9 +1481,15 @@ var NftGallery = function NftGallery(_ref) {
+@@ -1431,9 +1512,15 @@ var NftGallery = function NftGallery(_ref) {
      });
    };
  
 +  var retryLastRequest = function retryLastRequest() {
-+    return loadAssets(ownerAddress, openseaApiKey, isProxyApi, apiUrl, nextCursor);
++    return loadAssets(ownerAddress, openseaApiKey, isProxyApi, apiUrl, autoRetry, nextCursor);
 +  };
 +
    return React.createElement("div", {
@@ -369,7 +405,7 @@ index b22d715..16c4633 100644
      style: galleryContainerStyle,
      className: joinClassNames('rnftg-h-full rnftg-p-6 rnftg-overflow-auto rnftg-bg-gray-50 dark:rnftg-bg-gray-900', isInline ? 'rnftg--inline' : '')
    }, React.createElement("div", {
-@@ -1462,9 +1518,7 @@ var NftGallery = function NftGallery(_ref) {
+@@ -1462,9 +1549,7 @@ var NftGallery = function NftGallery(_ref) {
      }, item) : item;
    })), hasLoadMoreButton && canLoadMore && React.createElement(LoadMoreButton, {
      onClick: function onClick() {
