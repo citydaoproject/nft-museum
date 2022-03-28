@@ -1,5 +1,5 @@
 diff --git a/node_modules/react-nft-gallery/dist/react-nft-gallery.esm.js b/node_modules/react-nft-gallery/dist/react-nft-gallery.esm.js
-index b22d715..9b2d9c2 100644
+index b22d715..616e266 100644
 --- a/node_modules/react-nft-gallery/dist/react-nft-gallery.esm.js
 +++ b/node_modules/react-nft-gallery/dist/react-nft-gallery.esm.js
 @@ -992,7 +992,22 @@ var LoadMoreButton = function LoadMoreButton(_ref) {
@@ -400,8 +400,9 @@ index b22d715..9b2d9c2 100644
 +  };
 +
    return React.createElement("div", {
-     className: joinClassNames(darkMode ? 'rnftg-dark' : '', 'rnftg-h-full')
+-    className: joinClassNames(darkMode ? 'rnftg-dark' : '', 'rnftg-h-full')
 -  }, React.createElement("div", {
++    className: joinClassNames(darkMode ? 'rnftg-dark' : '', 'rnftg-h-full rnftg-w-full')
 +  }, hasError && React.createElement(RetryButton, {
 +    onClick: retryLastRequest
 +  }), React.createElement("div", {
