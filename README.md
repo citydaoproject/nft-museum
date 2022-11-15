@@ -5,7 +5,7 @@
 **Status:**
 This project is still active and can be improved if you come up with acceptable suggestions/requests. [Discord thread here.](https://discord.com/channels/860356969521217536/1019345802495275120)
 
--- screenshot of front-end uploaded to github --
+![screenshot of the website running on local machine](https://user-images.githubusercontent.com/62179036/202001991-1120763e-eee0-4e33-b9f4-776aa48a0bef.png)
 
 ## Getting Started
 
